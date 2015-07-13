@@ -1,4 +1,4 @@
-#11/03/2014 - Recuparação do solver#
+###11/03/2014 - Recuparação do solver###
 
 Este solver foi modificado com erro e recuperado para usar source-term 
 e escrever um arquivo "coupling" com informaçõe da temperatura 
@@ -10,7 +10,7 @@ funciona como antes da modificação.
 Este arquivo é um backup antes da alteração para que o solver seja 
 capaz de manipular mais de um sólido.
 
-#12/03/2014 - Mudança - múltiplos sólidos#
+###12/03/2014 - Mudança - múltiplos sólidos###
 
 Implementada a leitura do arquivo Q em todos os diretórios de sólidos.
 Simulação roda.
@@ -18,7 +18,7 @@ Simulação roda.
 TODO: Implementar para que sejam opcionais.
       Testar o arquivo de saída T, rho para o acoplamento.
 
-#25/03/2014 - Mudança#
+###25/03/2014 - Mudança###
 
 A leitura de termos-fonte via fvOptions foi removida no 
 createSolidFields.H. O único termo-fonte desse solver é o 
@@ -30,7 +30,7 @@ setRegionSolidFiedls e solveSolid.H
 
 Compilou e rodou. Necessários testes no resultado.
 
-#11/04/2014#
+###11/04/2014###
 
 A remoção do fvOptions (aparentemente) não afetou o 
 solver.
@@ -48,7 +48,7 @@ foi modificado para inclur o objeto fortran.
 
 A chamada funciona corretamente.
 
-#24/05/2014#
+###24/05/2014###
 
 Mudanças no solver. Removidos arquivos do chtMultiRegionFoam.
 Gerado novo solver newChtMultiRegionSimpleFoam.
@@ -66,7 +66,7 @@ Leitura de Q externo possível de 2 formas:
 Ambos funcionam. Ainda não foi completamente testado com um script 
 externo.
 
-#06/06/2014#
+###06/06/2014###
 
 Solver testado com script externo sequencialmente. 
 Le e escreve Q, rho e T. Os Q lidos são efetivamente usados no cáculo.
@@ -82,14 +82,14 @@ valores de Q internos nos processos.
 em procInfo (labelIOList) dos processos com os índices das células 
 de cada domínio separado.
 
-#09/06/2014#
+###09/06/2014###
 
 Obtenção de Q via arquivo e cálculo com Q finalizados.
 Tanto para modo sequencial quanto paralelo.
 O arquivo Q no diretório 10/fuel depois do reconstructPar 
 é idêntico nos dois casos.
 
-#15/04/2015 -----------------------------------------------------------#
+###15/04/2015 -----------------------------------------------------------###
 
 NOVO: thesisChtMultiRegionFoam
 
@@ -98,12 +98,12 @@ Mapping 1 para 1.
 
 Testado inicialmente na buril-lx.
 
-#15/04/2015#
+###15/04/2015###
 
 Leitura dos arquivos em constant/set para uso no mapeamento dos campos
 em cada processador para um vetor global com dados de rho, T e Q.
 
-#30/04/2015#
+###30/04/2015###
 
 Os sets relacionando as células na região ao mesh completo são lidos
 via IOobjects.
@@ -116,7 +116,7 @@ na malha completa. Isso feito por região.
 TODO: Ler valores de T, rho e Q para o vetor geral
       Comparar as posições com o que o paraview vai dar.
       
-#10/05/2015#
+###10/05/2015###
 
 Os sets são modificados via chamada de sistema sed para que a classe
 no arquivo 'cellSet' seja substituída por 'labelList'. Isso é necessário
@@ -135,7 +135,7 @@ TODO: Colocar valores de Q nos processadores.
       Normalizar neutrônica.
       Modificar neutrônica.
 
-#09/07/2015#
+###09/07/2015###
 
 Sequencial e paralelo implementados.
 A neutronica é testada por um vetor com valores aleatórios entre 0.9 e 1.1.
@@ -145,4 +145,10 @@ A neutronica é executada a cada 100 iterações da termohidráulica. Está fixo
 
 TODO: Criar IOobject para controlar as iteracoes.
       Adaptar a neutronica verdadeira e acrescentar.
-      
+     
+###13/07/2015###
+
+Diretório da neutronica acrescentado no workspace do solver.
+Tudo incluido no github.
+
+ 
