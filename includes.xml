@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdtprojectproperties>
+<section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.IncludePaths">
+<language name="C++ Source File">
+<includepath>/home/vitors/OpenFOAM/OpenFOAM-2.2.2/src/finiteVolume/lnInclude</includepath>
+<includepath>/home/vitors/OpenFOAM/OpenFOAM-2.2.2/src/OpenFOAM/lnInclude</includepath>
+<includepath>/home/vitors/OpenFOAM/OpenFOAM-2.2.2/src/OSspecific/POSIX/lnInclude</includepath>
+<includepath>/home/vitors/OpenFOAM/OpenFOAM-2.2.2/src/thermophysicalModels/basic/lnInclude</includepath>
+<includepath>/home/vitors/OpenFOAM/OpenFOAM-2.2.2/src/turbulenceModels/compressible/turbulenceModel/lnInclude</includepath>
+<includepath>/home/vitors/OpenFOAM/OpenFOAM-2.2.2/src/regionModels/regionModel/lnInclude</includepath>
+<includepath>/home/vitors/OpenFOAM/OpenFOAM-2.2.2/src/thermophysicalModels/solidThermo/lnInclude</includepath>
+<includepath>/home/vitors/OpenFOAM/OpenFOAM-2.2.2/src/thermophysicalModels/radiationModels/lnInclude</includepath>
+<includepath>/home/vitors/OpenFOAM/OpenFOAM-2.2.2/src/fvOptions/lnInclude</includepath>
+<includepath>/home/vitors/OpenFOAM/OpenFOAM-2.2.2/src/meshTools/lnInclude</includepath>
+<includepath>/home/vitors/OpenFOAM/OpenFOAM-2.2.2/src/sampling/lnInclude</includepath>
+
+</language>
+<language name="C Source File">
+
+</language>
+<language name="Object File">
+
+</language>
+<language name="Assembly Source File">
+
+</language>
+</section>
+<section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.Macros">
+<language name="C++ Source File">
+
+</language>
+<language name="C Source File">
+
+</language>
+<language name="Object File">
+
+</language>
+<language name="Assembly Source File">
+
+</language>
+</section>
+</cdtprojectproperties>

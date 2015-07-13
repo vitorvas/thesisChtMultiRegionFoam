@@ -1,0 +1,5 @@
+chtMultiRegionSimpleFoam.C
+q.f90
+
+EXE = $(FOAM_APPBIN)/chtMultiRegionSimpleFoam
+

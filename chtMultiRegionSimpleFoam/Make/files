@@ -1,0 +1,4 @@
+chtMultiRegionSimpleFoam.C
+
+EXE = /home/vitors/bin/thesisCoupledFoam
+
