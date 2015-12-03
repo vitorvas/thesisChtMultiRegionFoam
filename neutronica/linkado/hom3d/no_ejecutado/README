@@ -1,3 +1,0 @@
-- archivo "constants.in" : tiene la informacion de materiales, secciones eficaces y el nombre del archivo de gmsh
-- archivo ".msh" : la malla
-- archivo "input": tiene los parametros de control del programa. Las lineas impares no las lee, solo lee las pares

@@ -151,4 +151,20 @@ TODO: Criar IOobject para controlar as iteracoes.
 Diretório da neutronica acrescentado no workspace do solver.
 Tudo incluido no github.
 
+###14/09/2015 ###
+
+A condição de contorno utilizada como interface entre materiais 
+e que implementa resistência de contato foi implementada na 
+versão 2.4.0 do OpenFOAM. O código equivalente foi acrescentado 
+à versão 2.2.2 local (não ao solver).
+
+###03/12/2015###
+
+_Mudança_na_neutrônica_
+
+A partir desta versão, a neutrônica passa a ser resolvida pelo
+código Milonga (plug-in do Wasora).
+
+A comunicação não se dará por compilação por bibliotecas, mas 
+por comunicação via _shared_memory_ POSIX.
  

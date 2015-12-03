@@ -19,7 +19,11 @@
         fvc::interpolate(rho)*(fvc::interpolate(HbyA) & mesh.Sf())
     );
 
-    fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
+    // OpenFOAM 2.2.2
+//    fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
+
+    // OpenFOAM 2.4.0
+    fvOptions.makeRelative(fvc::interpolate(rho), phiHbyA);
 
     bool closedVolume = adjustPhi(phiHbyA, U, p_rgh);
 
