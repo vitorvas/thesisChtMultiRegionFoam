@@ -1,0 +1,126 @@
+# The next variables have to been defined in terminal:
+#
+#  export PETSC_ARCH=linux-gnu
+  export PETSC_ARCH=openfoam
+  export PETSC_DIR=/home/EQN_SOFT/petsc-3.4.4
+  export SLEPC_DIR=/home/EQN_SOFT/slepc-3.4.4
+
+# Then, run the following command : make install
+#
+#
+#
+
+name_program = voldif_d
+
+f90=/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90
+
+CFLAGS     =
+FFLAGS     =-fpic -g -ffree-line-length-none
+CPPFLAGS   =
+FPPFLAGS   =
+
+%.o : %.mod
+
+
+LIBS_INTEL = -L/opt/intel/composerxe-2011.4.191/mkl/lib/intel64 \
+             -lmkl_solver_lp64_sequential \
+             -lmkl_intel_lp64 \
+             -lmkl_sequential \
+             -lmkl_core
+
+
+objects= variables_xs_module.o \
+ interpol.o \
+ pbttinput.o \
+ pbttxsec.o \
+ qtab2d.o \
+ quinat.o \
+ read_GEOM.o \
+ xsecfb13.o \
+ xsipbtt.o \
+ general_module.o \
+ xsnemtab.o \
+ gmsh_module.o \
+ input_module.o \
+ materialscells_module.o \
+ equations_module.o \
+ lapack_module.o \
+ kernel_module.o \
+ output_module.o \
+ setup_module.o \
+ main.o
+
+include ${SLEPC_DIR}/conf/slepc_common
+
+# Check if variables were set
+
+all: comp_eigensolver_module $(objects)
+	-${FLINKER} -shared -o libvoldif_d.so $(objects) eigensolver_module.o  $(LIBS_INTEL)  ${SLEPC_LIB} 
+	${RM}  *.o *.mod
+
+comp_eigensolver_module : eigensolver_module.o chkopts 
+
+general_module.o: general_module.f90
+	$(f90) $(FFLAGS) -c general_module.f90
+
+gmsh_module.o: gmsh_module.f90 
+	$(f90) $(FFLAGS) -c gmsh_module.f90
+                  
+input_module.o: input_module.f90
+	$(f90) $(FFLAGS) -c input_module.f90
+
+materialscells_module.o: materialscells_module.f90
+	$(f90) $(FFLAGS) -c materialscells_module.f90
+
+equations_module.o: equations_module.f90 $(modules)
+	$(f90) $(FFLAGS) -c equations_module.f90
+
+lapack_module.o: lapack_module.f90
+	$(f90) $(FFLAGS) -c lapack_module.f90
+
+kernel_module.o: kernel_module.f90
+	$(f90) $(FFLAGS) -c kernel_module.f90
+
+output_module.o: output_module.f90
+	$(f90) $(FFLAGS) -c output_module.f90
+
+setup_module.o: setup_module.f90
+	$(f90) $(FFLAGS) -c setup_module.f90
+
+main.o: main.f90
+	$(f90) $(FFLAGS) -c main.f90
+
+
+
+
+
+variables_xs_module.o: variables_xs_module.f90
+	$(f90) $(FFLAGS) -c variables_xs_module.f90
+
+interpol.o: interpol.f
+	$(f90) $(FFLAGS) -c interpol.f
+
+pbttinput.o: pbttinput.f90
+	$(f90) $(FFLAGS) -c pbttinput.f90
+
+pbttxsec.o: pbttxsec.f90
+	$(f90) $(FFLAGS) -c pbttxsec.f90
+
+qtab2d.o: qtab2d.f90
+	$(f90) $(FFLAGS) -c qtab2d.f90
+
+quinat.o: quinat.f
+	$(f90) $(FFLAGS) -c quinat.f
+
+read_GEOM.o: read_GEOM.f90
+	$(f90) $(FFLAGS) -c read_GEOM.f90
+
+xsecfb13.o: xsecfb13.f90
+	$(f90) $(FFLAGS) -c xsecfb13.f90
+
+xsipbtt.o: xsipbtt.f90
+	$(f90) $(FFLAGS) -c xsipbtt.f90
+
+xsnemtab.o: xsnemtab.f90
+	$(f90) $(FFLAGS) -c xsnemtab.f90
+

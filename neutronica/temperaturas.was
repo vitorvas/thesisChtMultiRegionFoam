@@ -1,0 +1,27 @@
+n = 32
+
+VECTOR vec_T SIZE n
+VECTOR vec_d SIZE n
+VECTOR vec_P SIZE n
+
+vec_T(i) = 100.1+i
+vec_d(i) = 1000+0.1*i
+vec_P(i) = 0
+
+WRITE SHM_OBJECT potencias vec_P
+WRITE SHM_OBJECT temperaturas vec_T
+WRITE SHM_OBJECT densidades vec_d
+
+PRINT vec_P
+
+SEM temp-sent POST
+
+PRINT TEXT "ya lo enviamos!"
+
+SEM temp-received WAIT
+
+READ SHM_OBJECT potencias vec_P
+
+PRINT TEXT "lo recibieron, nos vamos"
+
+PRINT vec_P

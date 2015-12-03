@@ -1,0 +1,84 @@
+
+
+[vsilva@quasar neutronica]$ make -f mymakefile all
+/usr/lib64/openmpi/bin/mpif90 -c -fpic -g -ffree-line-length-none -fPIC -Wall -Wno-unused-variable -O3   -I/home/EQN_SOFT/petsc-3.4.4/include -I/home/EQN_SOFT/petsc-3.4.4/linux-gnu/include -I/usr/lib64/openmpi/include -I/usr/include/openmpi-x86_64    -I/home/EQN_SOFT/slepc-3.4.4 -I/home/EQN_SOFT/slepc-3.4.4/linux-gnu/include -I/home/EQN_SOFT/slepc-3.4.4/include -o eigensolver_module.o eigensolver_module.F90
+mpif90 -fpic -g -ffree-line-length-none -c variables_xs_module.f90
+mpif90 -fpic -g -ffree-line-length-none -c interpol.f
+mpif90 -fpic -g -ffree-line-length-none -c pbttinput.f90
+mpif90 -fpic -g -ffree-line-length-none -c pbttxsec.f90
+mpif90 -fpic -g -ffree-line-length-none -c qtab2d.f90
+mpif90 -fpic -g -ffree-line-length-none -c quinat.f
+mpif90 -fpic -g -ffree-line-length-none -c read_GEOM.f90
+mpif90 -fpic -g -ffree-line-length-none -c xsecfb13.f90
+mpif90 -fpic -g -ffree-line-length-none -c xsipbtt.f90
+mpif90 -fpic -g -ffree-line-length-none -c general_module.f90
+general_module.f90:2406.16:
+
+if (debug) pause
+                1
+Warning: Deleted feature: PAUSE statement at (1)
+general_module.f90:2436.16:
+
+if (debug) pause
+                1
+Warning: Deleted feature: PAUSE statement at (1)
+mpif90 -fpic -g -ffree-line-length-none -c xsnemtab.f90
+mpif90 -fpic -g -ffree-line-length-none -c gmsh_module.f90
+mpif90 -fpic -g -ffree-line-length-none -c input_module.f90
+mpif90 -fpic -g -ffree-line-length-none -c materialscells_module.f90
+mpif90 -fpic -g -ffree-line-length-none -c equations_module.f90
+mpif90 -fpic -g -ffree-line-length-none -c lapack_module.f90
+mpif90 -fpic -g -ffree-line-length-none -c kernel_module.f90
+mpif90 -fpic -g -ffree-line-length-none -c output_module.f90
+mpif90 -fpic -g -ffree-line-length-none -c setup_module.f90
+mpif90 -fpic -g -ffree-line-length-none -c main.f90
+/usr/lib64/openmpi/bin/mpif90 -fPIC -Wall -Wno-unused-variable -O3  -fpic -g -ffree-line-length-none -o voldif   variables_xs_module.o interpol.o pbttinput.o pbttxsec.o qtab2d.o quinat.o read_GEOM.o xsecfb13.o xsipbtt.o general_module.o xsnemtab.o gmsh_module.o input_module.o materialscells_module.o equations_module.o lapack_module.o kernel_module.o output_module.o setup_module.o main.o eigensolver_module.o  -L/opt/intel/composerxe-2011.4.191/mkl/lib/intel64 -lmkl_solver_lp64_sequential -lmkl_intel_lp64 -lmkl_sequential -lmkl_core  -Wl,-rpath,/home/EQN_SOFT/slepc-3.4.4/linux-gnu/lib -L/home/EQN_SOFT/slepc-3.4.4/linux-gnu/lib -lslepc       -Wl,-rpath,/home/EQN_SOFT/petsc-3.4.4/linux-gnu/lib -L/home/EQN_SOFT/petsc-3.4.4/linux-gnu/lib  -lpetsc -Wl,-rpath,/home/EQN_SOFT/petsc-3.4.4/linux-gnu/lib -lcmumps -ldmumps -lsmumps -lzmumps -lmumps_common -lpord -lscalapack -lflapack -lfblas -lX11 -lparmetis -lmetis -lpthread -Wl,-rpath,/usr/lib64/openmpi/lib -L/usr/lib64/openmpi/lib -Wl,-rpath,/usr/lib/gcc/x86_64-redhat-linux/4.4.7 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7 -Wl,-rpath,/opt/intel/composerxe-2011.4.191/compiler/lib/intel64 -L/opt/intel/composerxe-2011.4.191/compiler/lib/intel64 -Wl,-rpath,/opt/intel/composerxe-2011.4.191/ipp/lib/intel64 -L/opt/intel/composerxe-2011.4.191/ipp/lib/intel64 -Wl,-rpath,/opt/intel/composerxe-2011.4.191/mkl/lib/intel64 -L/opt/intel/composerxe-2011.4.191/mkl/lib/intel64 -Wl,-rpath,/opt/intel/composerxe-2011.4.191/tbb/lib/intel64/cc4.1.0_libc2.4_kernel2.6.16.21 -L/opt/intel/composerxe-2011.4.191/tbb/lib/intel64/cc4.1.0_libc2.4_kernel2.6.16.21 -lmpi_f90 -lmpi_f77 -lgfortran -lm -lm -lmpi_cxx -lstdc++ -lmpi_cxx -lstdc++ -ldl -lmpi -lgcc_s -lpthread -ldl  
+/usr/lib/gcc/x86_64-redhat-linux/4.4.7/libgfortranbegin.a(fmain.o): In function `main':
+(.text+0x26): undefined reference to `MAIN__'
+collect2: ld returned 1 exit status
+make: [all] Error 1 (ignored)
+/bin/rm -f  *.mod
+
+
+
+
+
+
+
+
+
+
+[vsilva@quasar neutronica]$ make -f makefile_compil_lib_d install
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -c -fpic -g -ffree-line-length-none -fPIC -Wall -Wno-unused-variable -O3   -I/home/EQN_SOFT/petsc-3.4.4/include -I/home/EQN_SOFT/petsc-3.4.4/openfoam/include -I/home/EQN_SOFT/openmpi-1.6.3/install/include    -I/home/EQN_SOFT/slepc-3.4.4 -I/home/EQN_SOFT/slepc-3.4.4/openfoam/include -I/home/EQN_SOFT/slepc-3.4.4/include -o eigensolver_module.o eigensolver_module.F90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c variables_xs_module.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c interpol.f
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c pbttinput.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c pbttxsec.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c qtab2d.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c quinat.f
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c read_GEOM.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c xsecfb13.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c xsipbtt.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c general_module.f90
+general_module.f90:2406.16:
+
+if (debug) pause
+                1
+Warning: Deleted feature: PAUSE statement at (1)
+general_module.f90:2436.16:
+
+if (debug) pause
+                1
+Warning: Deleted feature: PAUSE statement at (1)
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c xsnemtab.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c gmsh_module.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c input_module.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c materialscells_module.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c equations_module.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c lapack_module.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c kernel_module.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c output_module.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c setup_module.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fpic -g -ffree-line-length-none -c main.f90
+/home/EQN_SOFT/openmpi-1.6.3/install/bin/mpif90 -fPIC -Wall -Wno-unused-variable -O3  -fpic -g -ffree-line-length-none -shared -o libvoldif_d.so variables_xs_module.o interpol.o pbttinput.o pbttxsec.o qtab2d.o quinat.o read_GEOM.o xsecfb13.o xsipbtt.o general_module.o xsnemtab.o gmsh_module.o input_module.o materialscells_module.o equations_module.o lapack_module.o kernel_module.o output_module.o setup_module.o main.o eigensolver_module.o  -L/opt/intel/composerxe-2011.4.191/mkl/lib/intel64 -lmkl_solver_lp64_sequential -lmkl_intel_lp64 -lmkl_sequential -lmkl_core  -Wl,-rpath,/home/EQN_SOFT/slepc-3.4.4/openfoam/lib -L/home/EQN_SOFT/slepc-3.4.4/openfoam/lib -lslepc       -Wl,-rpath,/home/EQN_SOFT/petsc-3.4.4/openfoam/lib -L/home/EQN_SOFT/petsc-3.4.4/openfoam/lib  -lpetsc -Wl,-rpath,/home/EQN_SOFT/petsc-3.4.4/openfoam/lib -lcmumps -ldmumps -lsmumps -lzmumps -lmumps_common -lpord -lscalapack -lflapack -lfblas -lX11 -lparmetis -lmetis -lpthread -Wl,-rpath,/home/EQN_SOFT/openmpi-1.6.3/install/lib -L/home/EQN_SOFT/openmpi-1.6.3/install/lib -Wl,-rpath,/usr/lib/gcc/x86_64-redhat-linux/4.4.7 -L/usr/lib/gcc/x86_64-redhat-linux/4.4.7 -Wl,-rpath,/opt/intel/composerxe-2011.4.191/compiler/lib/intel64 -L/opt/intel/composerxe-2011.4.191/compiler/lib/intel64 -Wl,-rpath,/opt/intel/composerxe-2011.4.191/ipp/lib/intel64 -L/opt/intel/composerxe-2011.4.191/ipp/lib/intel64 -Wl,-rpath,/opt/intel/composerxe-2011.4.191/mkl/lib/intel64 -L/opt/intel/composerxe-2011.4.191/mkl/lib/intel64 -Wl,-rpath,/opt/intel/composerxe-2011.4.191/tbb/lib/intel64/cc4.1.0_libc2.4_kernel2.6.16.21 -L/opt/intel/composerxe-2011.4.191/tbb/lib/intel64/cc4.1.0_libc2.4_kernel2.6.16.21 -lmpi_f90 -lmpi_f77 -lgfortran -lm -lm -lm -lm -lm -lm -lmpi_cxx -lstdc++ -lmpi_cxx -lstdc++ -ldl -lmpi -lrt -lnsl -lutil -lgcc_s -lpthread -ldl  
+/bin/rm -f *.mod

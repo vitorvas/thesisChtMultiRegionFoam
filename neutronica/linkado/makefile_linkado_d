@@ -1,0 +1,10 @@
+
+
+f90= mpif90
+
+
+include ${SLEPC_DIR}/conf/slepc_common
+
+install:
+	-${FLINKER} -g -o prueba_d  inp.f90  ../voldif_d.a  ${SLEPC_LIB}
+	 ${RM} *.o 

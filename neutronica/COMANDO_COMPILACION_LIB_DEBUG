@@ -1,0 +1,4 @@
+make -f makefile_compil_lib_d install
+gfortran -shared -o libvoldif_d.so variables_xs_module.o  interpol.o  pbttinput.o  pbttxsec.o  qtab2d.o  quinat.o  read_GEOM.o  xsecfb13.o  xsipbtt.o  general_module.o  xsnemtab.o  gmsh_module.o  input_module.o  materialscells_module.o  equations_module.o  lapack_module.o  kernel_module.o  output_module.o  setup_module.o  main.o eigensolver_module.o
+rm *.o 
+

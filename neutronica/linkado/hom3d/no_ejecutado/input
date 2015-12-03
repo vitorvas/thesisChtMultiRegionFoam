@@ -1,0 +1,28 @@
+number_materials
+54
+boundary_conditions  (-X +X -Y +Y -Z +Z)  (0:vacuum  ,  1:simmetry)
+0 0 0 0 0 0 
+criticality_problem (1:Yes ,  0:No  , 2:Yes and default parameters, 3:1+adjoint, 4:2+adjoint)
+1
+parameters_eigenvalue_problem (nev ncv mpd) (nev:number of eigenvalues , ncv:number of column vector , mpd:maximum projected dimension ) (default: 5 10 10)
+5 12 9
+combination of polynomial coefficients
+0 0 0   1 0 0   0 1 0   0 0 1   2 0 0     
+cross_section_reading  (1:constants.in, 2:NEMTAB 3D thermalhydraulic data, 3:NEMTAB uniform thermalhydraulic data) (By default:1)
+1
+uniform_thermalhydraulic_variables (moderator_density fuel_temperature moderator_temperature) (it is only needed if the value of the line before is 3) 
+0.2    1200.00    650.0
+control_rod_bank_aixal_position (it should have the same number of entries as the number of control rod banks)
+340.0   340.0   340.0   340.0   340.0   340.0   340.0   340.0   340.0   340.0   340.0   340.0   340.0
+reactor_type (0:PWR, 1:BWR)
+0
+number_of_compositions_in_NEMTAB
+1155
+post-processing options (0:No post-processing, 1:Only nodes results, 2:Nodes results and average profiles)
+2
+nx ny nz [it will be used in post-processing]
+3 3 6
+Radial core map (0: Void, 1:Reflector, 2:Fuel) [it will be used in post-processing]
+2 2 2
+2 2 2
+2 2 2
