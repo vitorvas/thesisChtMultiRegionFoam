@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     // Number of CFD iterations before neutronics call
     // hardcoded:
     unsigned int nIterations = 0;
-    unsigned int cFact = 100;
+    unsigned int cFact = 2;
    
     regionProperties rp(runTime);
   
@@ -157,21 +157,17 @@ int main(int argc, char *argv[])
 	//   ran using the std::fmod() function. If yes:
 	// - copy all data from all processors to completeLists[]
 	// - call neutronics
-	// - normalize all qVol data. This means that the data returned
-	//   from neutronics is not copied over qVol, but rather the data
-	//   multiplies qVol ir order to have a normalized value.
-	//
-	// After the regions loops, neutronics is called.
-	// The new Q is non-normalized. The Q data must then be multiplied
-	// by the new Q obtained from neutronics.
+	// - There is NO normalization. Data comes from Milonga as power. 
+	// - scatter data from Q to all processors back. (This only happens
+	//   for region 'fuel')
 	// - bool values updated to make
       
-	// Info << " ------ %: " << nIterations%cFact
-	// 	   << " time().value()= " << runTime.time().value()
-	// 	   << " cFact= " << cFact
-	// 	   << endl;
+	Info << " ------ %: " << nIterations%cFact
+		   << " time().value()= " << runTime.time().value()
+		   << " cFact= " << cFact
+		   << endl;
 
-	if(!(nIterations%cFact))
+	if(!(nIterations%cFact)) // Controls neutronics call
 	{
 	    forAll(fluidRegions, i)
 	    {
@@ -216,6 +212,10 @@ int main(int argc, char *argv[])
 			    // which maps to the data coming from processors
 			    temperatureCompleteList[fluidRegionsLists[i][(k*dataT[k].size())+m]] = dataT[k][m];
 			    densityCompleteList[fluidRegionsLists[i][(k*dataRho[k].size())+m]] = dataRho[k][m];
+
+			    // First test to send data to Milonga
+			    shmTarray[fluidRegionsLists[i][(k*dataT[k].size())+m]] = dataT[k][m];
+			    shmDarray[fluidRegionsLists[i][(k*dataRho[k].size())+m]] = dataRho[k][m];
 			}
 		    }
 		}
@@ -284,6 +284,11 @@ int main(int argc, char *argv[])
 			    temperatureCompleteList[solidRegionsLists[i][(k*dataT[k].size())+m]] = dataT[k][m];
 			    densityCompleteList[solidRegionsLists[i][(k*dataRho[k].size())+m]] = dataRho[k][m];
 			    powerCompleteList[solidRegionsLists[i][(k*dataQ[k].size())+m]] = dataQ[k][m];
+
+			    // First test to send data to Milonga
+			    shmTarray[solidRegionsLists[i][(k*dataT[k].size())+m]] = dataT[k][m];
+			    shmDarray[solidRegionsLists[i][(k*dataRho[k].size())+m]] = dataRho[k][m];
+
 			}
 		    }
 		}
@@ -303,22 +308,29 @@ int main(int argc, char *argv[])
 		// -----------------------------------------------------------------------------------------
 
 		// Calling neutronics
-		if(solidRegions[i].name() == "fuel")
+		if(solidRegions[i].name() == "fuel" && Pstream::master())
 		{
 		    Info << nl << "Calling NEUTRONICS..." << nl << endl;
 		    for(int o=0; o<solidRegionsLists[i].size(); o++)
-			powerCompleteList[solidRegionsLists[i][o]] =  0.9 + static_cast <float> (rand())
-			    /( static_cast <float> (RAND_MAX/(1.1-0.9)));
+		    {
+			powerCompleteList[solidRegionsLists[i][o]] = shmQarray[solidRegionsLists[i][o]];
+//			powerCompleteList[solidRegionsLists[i][o]] =  0.9 + static_cast <float> (rand())
+//			    /( static_cast <float> (RAND_MAX/(1.1-0.9)));
+		    }
+
+		    // Send semaphore to Milonga
+      		    sem_post(semreceived);
+		    Info << " ---: Semaphoro enviado com valor: " << strerror(errno) << endl;
 		}
 	      
 	    } // End forAll solid loop
 
 	  
 	    // -----------------------------------------------------------------------------------------
-	    // -----------------------------------------------------------------------------------------
-	    // -----------------------------------------------------------------------------------------
+	    // After neutronics call, Q data must be scattered to all processors and regions
 
-	    forAll(solidRegions, i)
+	    forAll(solidRegions, i) // Loop to scatter Q data from neutronics to all regions and processors
+		                    // Note that only the 'fuel' region is used.
 	    {
 		// Initialize dataQ field with the right size
 		List<scalarList> dataQ(Pstream::nProcs());
@@ -345,7 +357,7 @@ int main(int argc, char *argv[])
 				// ATTENTION:
 				// Tricky mapping among the complete vector, using the solid Regions data
 				// which maps to the data coming from processors
-				dataQ[k][m] *= powerCompleteList[solidRegionsLists[i][(k*dataQ[k].size())+m]];
+				dataQ[k][m] = powerCompleteList[solidRegionsLists[i][(k*dataQ[k].size())+m]];
 			    }
 			}
 
@@ -358,7 +370,7 @@ int main(int argc, char *argv[])
 
 			// For the main process or in a sequential run
 			// update qVol data from neutronics
-			qVol[i].internalField() *= dataQ[0];
+			qVol[i].internalField() = dataQ[0];
 		    }
 		    else
 		    {
@@ -369,10 +381,11 @@ int main(int argc, char *argv[])
 			inputSlavesStream >> localDataQ;
 
 			// Copy data to local scalarField qVol[fuel]
-			qVol[i].internalField() *= localDataQ;
+			qVol[i].internalField() = localDataQ;
 		      
 		    }
-		    Pout << " --- " << qVol[i].internalField() << nl << endl;
+		    Pout << " --- Q Size: " << qVol[i].internalField().size()
+			 << qVol[i].internalField() << nl << endl;
 		    solidRegions[i].write();		  
 		}
 	    }
