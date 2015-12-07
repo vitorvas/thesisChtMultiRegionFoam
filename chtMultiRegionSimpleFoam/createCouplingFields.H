@@ -45,8 +45,6 @@ if(shmTfile == -1 || shmDfile == -1 || shmQfile == -1)
     exit(errno);
 }
 
-Info << totalNumberOfCells << endl;
-
 if(Pstream::master())
 {
   for (int i=0; i<solidsNames.size(); ++i)
@@ -60,14 +58,16 @@ if(Pstream::master())
     }
 }
 
-List<float> temperatureCompleteList(totalNumberOfCells, 300.0);
-List<float> densityCompleteList(totalNumberOfCells, 1000.0);
-List<float> powerCompleteList(totalNumberOfCells, 0.0);
+Info << " ---: totalNumberOfCells: " << totalNumberOfCells << endl;
+
+List<double> temperatureCompleteList(totalNumberOfCells, 300.0);
+List<double> densityCompleteList(totalNumberOfCells, 1000.0);
+List<double> powerCompleteList(totalNumberOfCells, 0.0);
 
 // After reading the shared memory files, they must be mapped to data
-shmT = mmap(NULL, totalNumberOfCells, PROT_WRITE, MAP_SHARED, shmTfile, 0);
-shmD = mmap(NULL, totalNumberOfCells, PROT_WRITE, MAP_SHARED, shmDfile, 0);
-shmQ = mmap(NULL, totalNumberOfCells, PROT_WRITE, MAP_SHARED, shmQfile, 0);
+shmT = mmap(NULL, totalNumberOfCells*sizeof(double), PROT_WRITE, MAP_SHARED, shmTfile, 0);
+shmD = mmap(NULL, totalNumberOfCells*sizeof(double), PROT_WRITE, MAP_SHARED, shmDfile, 0);
+shmQ = mmap(NULL, totalNumberOfCells*sizeof(double), PROT_WRITE, MAP_SHARED, shmQfile, 0);
 
 // Check if all files were properly mapped
 if(shmT == MAP_FAILED || shmD == MAP_FAILED || shmQ == MAP_FAILED)
@@ -82,8 +82,6 @@ shmDarray = reinterpret_cast<double*>(shmD);
 shmQarray = reinterpret_cast<double*>(shmQ);
 
 
-
-
-for(unsigned int i=0; i<totalNumberOfCells; i++)
-    powerCompleteList[i] = 0.9 + static_cast <float> (rand())
-			      /( static_cast <float> (RAND_MAX/(1.1-0.9)));
+// for(unsigned int i=0; i<totalNumberOfCells; i++)
+//     powerCompleteList[i] = 0.9 + static_cast <float> (rand())
+// 			      /( static_cast <float> (RAND_MAX/(1.1-0.9)));
