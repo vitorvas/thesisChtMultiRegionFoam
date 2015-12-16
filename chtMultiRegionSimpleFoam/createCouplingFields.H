@@ -16,14 +16,17 @@ unsigned int totalNumberOfCells = 0;
 double *shmTarray;
 double *shmDarray;
 double *shmQarray;
+//int *shmFint;
 
 void *shmT;
 void *shmD;
 void *shmQ;
+//void *shmF;
 
 int shmTfile;
 int shmDfile;
 int shmQfile;
+//int shmFfile;
 
 // Posix C semaphores
 sem_t *semsent;
@@ -33,16 +36,20 @@ sem_t *semreceived;
 semsent = sem_open("semsent", O_CREAT, 0666);
 semreceived = sem_open("semreceived", O_CREAT, 0666);
 
+if(Pstream::master())
+{
 // Semaphores and shared memory files are tested at this point.
 // If milonga is not running, OpenFOAM exits.
-shmTfile = shm_open("temperaturas", O_RDWR, 0666);
-shmDfile = shm_open("densidades", O_RDWR, 0666);
-shmQfile = shm_open("potencias", O_RDWR, 0666);
+    shmTfile = shm_open("temperaturas", O_RDWR, 0666);
+    shmDfile = shm_open("densidades", O_RDWR, 0666);
+    shmQfile = shm_open("potencias", O_RDWR, 0666);
+//    shmFfile = shm_open("freemilonga", O_RDWR, 0666);
 
-if(shmTfile == -1 || shmDfile == -1 || shmQfile == -1)
-{
-    Info << " --- Error getting shared memory: " << strerror(errno) << ". Exiting..." << endl;
-    exit(errno);
+    if(shmTfile == -1 || shmDfile == -1 || shmQfile == -1 )//|| shmFfile == -1)
+    {
+	Info << " --- Error getting shared memory: " << strerror(errno) << ". Exiting..." << endl;
+	exit(errno);
+    }
 }
 
 if(Pstream::master())
@@ -64,23 +71,27 @@ List<double> temperatureCompleteList(totalNumberOfCells, 300.0);
 List<double> densityCompleteList(totalNumberOfCells, 1000.0);
 List<double> powerCompleteList(totalNumberOfCells, 0.0);
 
+if(Pstream::master())
+{
 // After reading the shared memory files, they must be mapped to data
-shmT = mmap(NULL, totalNumberOfCells*sizeof(double), PROT_WRITE, MAP_SHARED, shmTfile, 0);
-shmD = mmap(NULL, totalNumberOfCells*sizeof(double), PROT_WRITE, MAP_SHARED, shmDfile, 0);
-shmQ = mmap(NULL, totalNumberOfCells*sizeof(double), PROT_WRITE, MAP_SHARED, shmQfile, 0);
+    shmT = mmap(NULL, totalNumberOfCells*sizeof(double), PROT_WRITE, MAP_SHARED, shmTfile, 0);
+    shmD = mmap(NULL, totalNumberOfCells*sizeof(double), PROT_WRITE, MAP_SHARED, shmDfile, 0);
+    shmQ = mmap(NULL, totalNumberOfCells*sizeof(double), PROT_WRITE, MAP_SHARED, shmQfile, 0);
+//    shmF = mmap(NULL, sizeof(int), PROT_WRITE, MAP_SHARED, shmFfile, 0);
 
 // Check if all files were properly mapped
-if(shmT == MAP_FAILED || shmD == MAP_FAILED || shmQ == MAP_FAILED)
-{
-    Info << " --- Error mapping shared memory: " << strerror(errno) << ". Exiting..." << endl;
-    exit(errno);
-}
+    if(shmT == MAP_FAILED || shmD == MAP_FAILED || shmQ == MAP_FAILED)// || shmF == MAP_FAILED)
+    {
+	Info << " --- Error mapping shared memory: " << strerror(errno) << ". Exiting..." << endl;
+	exit(errno);
+    }
 
 // Make a C++ cast
-shmTarray = reinterpret_cast<double*>(shmT);
-shmDarray = reinterpret_cast<double*>(shmD);
-shmQarray = reinterpret_cast<double*>(shmQ);
-
+    shmTarray = reinterpret_cast<double*>(shmT);
+    shmDarray = reinterpret_cast<double*>(shmD);
+    shmQarray = reinterpret_cast<double*>(shmQ);
+//    shmFint = reinterpret_cast<int*>(shmF);
+}
 
 // for(unsigned int i=0; i<totalNumberOfCells; i++)
 //     powerCompleteList[i] = 0.9 + static_cast <float> (rand())

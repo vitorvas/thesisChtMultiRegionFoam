@@ -18,9 +18,6 @@
         Info<< "    Adding to radiations\n" << endl;
         radiations.set(i, radiation::radiationModel::New(thermos[i].T()));
 
-	Info<< " --- ADDED: Setting up region " << solidRegions[i].name()
-	    << "..." << endl;
-	
 	// Read Q if it exists. If not, create a null (zero)
 	// volScalarField
 	IOobject Qfile

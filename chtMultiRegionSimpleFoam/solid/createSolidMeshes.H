@@ -7,20 +7,20 @@
         Info<< "Create solid mesh for region " << solidsNames[i]
             << " for time = " << runTime.timeName() << nl << endl;
 
-        solidRegions.set
-        (
-            i,
-            new fvMesh
-            (
-                IOobject
-                (
-                    solidsNames[i],
-                    runTime.timeName(),
-                    runTime,
-                    IOobject::MUST_READ
-                )
-            )
-        );
+	    solidRegions.set
+		(
+		    i,
+		    new fvMesh
+		    (
+			IOobject
+			(
+			    solidsNames[i],
+			    runTime.timeName(),
+			    runTime,
+			    IOobject::MUST_READ
+			    )
+			)
+		    );
 
 	Info << "Create correspondence to the complete mesh for region "
 	     << solidsNames[i] << " for time = " << runTime.timeName()
@@ -65,12 +65,6 @@
 	  		  IOobject::NO_WRITE
 	  		  )
 	     );
-
-	  forAll(solidRegionsLists[i], k)
-	  {
-	    Info << solidRegionsLists[i][k] << " ";
-	  }
-	  Info << endl;
 	}
 
     }

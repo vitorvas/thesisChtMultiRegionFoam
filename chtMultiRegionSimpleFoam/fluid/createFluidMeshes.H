@@ -7,20 +7,20 @@
         Info<< "Create fluid mesh for region " << fluidNames[i]
             << " for time = " << runTime.timeName() << nl << endl;
 
-        fluidRegions.set
-        (
-            i,
-            new fvMesh
-            (
-                IOobject
-                (
-                    fluidNames[i],
-                    runTime.timeName(),
-                    runTime,
-                    IOobject::MUST_READ
-                )
-            )
-        );
+	    fluidRegions.set
+		(
+		    i,
+		    new fvMesh
+		    (
+			IOobject
+			(
+			    fluidNames[i],
+			    runTime.timeName(),
+			    runTime,
+			    IOobject::MUST_READ
+			    )
+			)
+		    );
 
 	Info << "Create correspondence to the complete mesh for region "
 	     << fluidNames[i] << " for time = " << runTime.timeName()
@@ -46,7 +46,7 @@
 	  fileName pM("polyMesh");
 	  fileName setS("sets");
 	  fileName setsPath(runTime.caseConstant());
-	  
+
 	  // Information about sets are stored in a cellSet class, which
 	  // IOobject read as a hashTable. This is a problem to keep the
 	  // information on data position in the coupling vector.
@@ -66,11 +66,5 @@
 	  		  IOobject::NO_WRITE
 	  		  )
 	     );
-
-	  forAll(fluidRegionsLists[i], k)
-	  {
-	    Info << fluidRegionsLists[i][k] << " ";
-	  }
-	  Info << endl;
 	}
     }
