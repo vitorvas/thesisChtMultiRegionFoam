@@ -191,6 +191,9 @@ int main(int argc, char *argv[])
 		// The if structure below gathers data from all processors
 		if(Pstream::master())
 		{
+		    // Wait for milonga.
+		    sem_wait(semsent);
+		    
 		    // For master processor data is copied directly
 		    dataT[0] = thermoFluid[i].T();
 		    dataRho[0] = thermoFluid[i].rho();
@@ -314,12 +317,10 @@ int main(int argc, char *argv[])
 		    for(int o=0; o<solidRegionsLists[i].size(); o++)
 		    {
 			powerCompleteList[solidRegionsLists[i][o]] = shmQarray[solidRegionsLists[i][o]];
-//			powerCompleteList[solidRegionsLists[i][o]] =  0.9 + static_cast <float> (rand())
-//			    /( static_cast <float> (RAND_MAX/(1.1-0.9)));
 		    }
 
 		    // Send semaphore to Milonga
-      		    sem_post(semreceived);
+		    sem_post(semreceived);
 		    Info << " ---: Semaphoro enviado com valor: " << strerror(errno) << endl;
 		}
 	      
@@ -384,15 +385,18 @@ int main(int argc, char *argv[])
 			qVol[i].internalField() = localDataQ;
 		      
 		    }
-		    Pout << " --- Q Size: " << qVol[i].internalField().size()
-			 << qVol[i].internalField() << nl << endl;
+		    Pout << " --- Q Size: " << qVol[i].internalField().size() << nl
+		     	 << qVol[i].internalField()[55] << nl << endl;
 		    solidRegions[i].write();		  
 		}
 	    }
 	}
-      
+	      
     } // runTime.loop()
 
+    // End of runTime.loop(), free milonga
+    //*shmFint = 1;
+    
     return 0;
 }
 

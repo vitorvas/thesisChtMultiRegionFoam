@@ -167,4 +167,20 @@ código Milonga (plug-in do Wasora).
 
 A comunicação não se dará por compilação por bibliotecas, mas 
 por comunicação via _shared_memory_ POSIX.
- 
+
+###18/12/2015###
+
+O vetor de potências é recebido do milonga e os vetores 
+de temperatura e densidade são enviados para ele.
+
+Os coeficientes de difusão estão fixos por enquanto.
+(Iniciados os estudos em como tratar as seções de choque 
+a partir dos dados ENDFx com objetivo de chegar aos coeficientes 
+a serem utilizados na equação diferencial a ser resolvida pelo 
+milonga.)
+
+O milonga deve ser chamado manualmente antes do OpenFOAM 
+e após a simulação no OpenFOAM o milonga deve ser manualmente 
+interrompido. Isto pode ser feito de forma automática mas 
+ainda não é prioridade.
+
