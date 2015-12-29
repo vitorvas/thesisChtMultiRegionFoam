@@ -62,6 +62,7 @@
 #include "fvIOoptionList.H"
 #include "OFstream.H"
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "SortableList.H"
 
 // C++ stdlib
 #include <fstream>
@@ -238,6 +239,16 @@ int main(int argc, char *argv[])
 	  
 	    forAll(solidRegions, i)
 	    {
+		// Force cells references ordering.
+		// It *seems* that OpenFOAM mix relative cell
+		// values when splitting the mesh among regions
+//		SortableList<label> tmp(solidRegionsLists[i]);
+		SortableList<label> *tmp;
+		tmp = new SortableList<label>(solidRegionsLists[i]);
+		solidRegionsLists[i].clear();
+		solidRegionsLists[i].append(*tmp);
+		delete(tmp);
+		
 		// Structures to hold data and cell addressing
 		// for all processors
 		List<scalarList> dataT(Pstream::nProcs());
@@ -276,7 +287,6 @@ int main(int argc, char *argv[])
 		    // Copy from dataT and dataRho to the completeList for SOLID Regions
 		    for(int k=0; k<Pstream::nProcs(); k++)
 		    {
-
 			// This loop invariant is the size of dataT, which is the same of dataRho and dataQ.
 			// Use of any of these lists yields the same result
 			for(int m=0; m<dataT[k].size(); m++)
@@ -321,7 +331,6 @@ int main(int argc, char *argv[])
 
 		    // Send semaphore to Milonga
 		    sem_post(semreceived);
-		    Info << " ---: Semaphoro enviado com valor: " << strerror(errno) << endl;
 		}
 	      
 	    } // End forAll solid loop
@@ -356,7 +365,7 @@ int main(int argc, char *argv[])
 			    for(int m=0; m<dataQ[k].size(); m++)
 			    {
 				// ATTENTION:
-				// Tricky mapping among the complete vector, using the solid Regions data
+				// Tricky mapping between the complete vector, using the solid Regions data
 				// which maps to the data coming from processors
 				dataQ[k][m] = powerCompleteList[solidRegionsLists[i][(k*dataQ[k].size())+m]];
 			    }
@@ -385,8 +394,6 @@ int main(int argc, char *argv[])
 			qVol[i].internalField() = localDataQ;
 		      
 		    }
-		    Pout << " --- Q Size: " << qVol[i].internalField().size() << nl
-		     	 << qVol[i].internalField()[55] << nl << endl;
 		    solidRegions[i].write();		  
 		}
 	    }
