@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
 		// The if structure below gathers data from all processors
 		if(Pstream::master())
 		{
-		    // For master data is copied directly
+		    // For master, data is copied directly
 		    dataT[0] = thermos[i].T();
 		    dataRho[0] = thermos[i].rho();
 		    dataQ[0] = qVol[i].internalField();
@@ -300,6 +300,11 @@ int main(int argc, char *argv[])
 		    // Copy from dataT and dataRho to the completeList for SOLID Regions
 		    for(int k=0; k<Pstream::nProcs(); k++)
 		    {
+			if(solidRegions[i].name() == "fuel")
+			{
+			    Pout << " --- ADDED: dataQ[" << k << "]= " << dataQ[k] << endl;
+			    Pout << " --- ADDED: solidList[" << solidRegions[i].name() << "][" << k << "]= " << solidList[i][k] << endl;
+			}
 			// This loop invariant is the size of dataT, which is the same of dataRho and dataQ.
 			// Use of any of these lists yields the same result
 			for(int m=0; m<dataT[k].size(); m++)
@@ -326,7 +331,7 @@ int main(int argc, char *argv[])
 		  
 		    // 0 references de master process
 		    OPstream outputSlavesStream(Pstream::blocking, 0);
-		    outputSlavesStream << localDataT << localDataRho << localDataQ << solidList[Pstream::myProcNo()];
+		    outputSlavesStream << localDataT << localDataRho << localDataQ << solidList[i][Pstream::myProcNo()];
 		}
 	      
 		// -----------------------------------------------------------------------------------------
@@ -367,7 +372,6 @@ int main(int argc, char *argv[])
 		    {
 			dataQ[k].setSize(qVol[i].internalField().size(), 1.0);
 		    }
-
 		    // The if structure below scatters data to all processors
 		    if(Pstream::master())
 		    {

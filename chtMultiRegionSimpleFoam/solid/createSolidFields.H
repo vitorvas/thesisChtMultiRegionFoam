@@ -4,8 +4,8 @@
     PtrList<volScalarField> betavSolid(solidRegions.size());
     PtrList<volScalarField> qVol(solidRegions.size());
 
-    List<labelList> solidList(Pstream::nProcs());
-
+    List<List<labelList> > solidList(solidRegions.size(), List<labelList>(Pstream::nProcs()));
+	
     // Populate solid field pointer lists
     forAll(solidRegions, i)
     {
@@ -130,7 +130,7 @@
 			    "/constant/"+solidRegions[i].name()+"/polyMesh");
 
 	  // Read cellProcAddressing for each processor
-	  solidList[Pstream::myProcNo()] = labelIOList(IOobject
+	  solidList[i][Pstream::myProcNo()] = labelIOList(IOobject
 	     (
 	      "cellProcAddressing", // Filename
 	      cellCorr,
@@ -139,7 +139,7 @@
 	      IOobject::NO_WRITE 	// Write Option
 	      ));
 
-
+	  // Create a mapping from each processor to the solidListsRegions
 	}
     }
 
