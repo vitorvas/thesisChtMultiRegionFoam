@@ -172,6 +172,18 @@ int main(int argc, char *argv[])
 	{
 	    forAll(fluidRegions, i)
 	    {
+
+		// Force cells references ordering.
+		// It *seems* that OpenFOAM mix relative cell
+		// values when splitting the mesh among regions
+		SortableList<label> *tmp;
+		tmp = new SortableList<label>(fluidRegionsLists[i]);
+
+		solidRegionsLists[i].clear();
+		solidRegionsLists[i].append(*tmp);
+
+		delete(tmp);
+
 		// Structures to hold data and cell addressing
 		// for all processors
 		List<scalarList> dataT(Pstream::nProcs());
@@ -242,11 +254,12 @@ int main(int argc, char *argv[])
 		// Force cells references ordering.
 		// It *seems* that OpenFOAM mix relative cell
 		// values when splitting the mesh among regions
-//		SortableList<label> tmp(solidRegionsLists[i]);
 		SortableList<label> *tmp;
 		tmp = new SortableList<label>(solidRegionsLists[i]);
+
 		solidRegionsLists[i].clear();
 		solidRegionsLists[i].append(*tmp);
+
 		delete(tmp);
 		
 		// Structures to hold data and cell addressing
