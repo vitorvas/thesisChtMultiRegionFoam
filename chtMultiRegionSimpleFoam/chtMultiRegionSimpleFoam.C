@@ -173,17 +173,20 @@ int main(int argc, char *argv[])
 	    forAll(fluidRegions, i)
 	    {
 
-		// Force cells references ordering.
-		// It *seems* that OpenFOAM mix relative cell
-		// values when splitting the mesh among regions
-		SortableList<label> *tmp;
-		tmp = new SortableList<label>(fluidRegionsLists[i]);
-
-		solidRegionsLists[i].clear();
-		solidRegionsLists[i].append(*tmp);
-
-		delete(tmp);
-
+		if(!Pstream::parRun())
+		{
+		    // Force cells references ordering.
+		    // It *seems* that OpenFOAM mix relative cell
+		    // values when splitting the mesh among regions
+		    SortableList<label> *tmp;
+		    tmp = new SortableList<label>(fluidRegionsLists[i]);
+		    
+		    solidRegionsLists[i].clear();
+		    solidRegionsLists[i].append(*tmp);
+		    
+		    delete(tmp);
+		}
+		
 		// Structures to hold data and cell addressing
 		// for all processors
 		List<scalarList> dataT(Pstream::nProcs());
@@ -252,16 +255,20 @@ int main(int argc, char *argv[])
 	    forAll(solidRegions, i)
 	    {
 		// Force cells references ordering.
-		// It *seems* that OpenFOAM mix relative cell
-		// values when splitting the mesh among regions
-		SortableList<label> *tmp;
-		tmp = new SortableList<label>(solidRegionsLists[i]);
-
-		solidRegionsLists[i].clear();
-		solidRegionsLists[i].append(*tmp);
-
-		delete(tmp);
-		
+		// For now, only if running sequentialy
+		if(!Pstream::parRun())
+		{
+		    // It *seems* that OpenFOAM mix relative cell
+		    // values when splitting the mesh among regions
+		    SortableList<label> *tmp;
+		    tmp = new SortableList<label>(solidRegionsLists[i]);
+		    
+		    solidRegionsLists[i].clear();
+		    solidRegionsLists[i].append(*tmp);
+		    
+		    delete(tmp);
+		}
+		    
 		// Structures to hold data and cell addressing
 		// for all processors
 		List<scalarList> dataT(Pstream::nProcs());
@@ -271,17 +278,14 @@ int main(int argc, char *argv[])
 		scalarList localDataT(thermos[i].T().size());
 		scalarList localDataRho(thermos[i].rho().size());
 		scalarList localDataQ(qVol[i].internalField().size());
-	      
+
 		// Since T, rho and Q have the same size
 		// the processing of all data is performed
 		// inside the same loop
-		for(int k=0; k<Pstream::nProcs(); k++)
-		{
-		    dataT[k].setSize(thermos[i].T().size(), 0.0);
-		    dataRho[k].setSize(thermos[i].rho().size(), 0.0);
-		    dataQ[k].setSize(qVol[i].size(), 0.0);
-		}
-	      
+		dataT[Pstream::myProcNo()].setSize(thermos[i].T().size(), 0.0);
+		dataRho[Pstream::myProcNo()].setSize(thermos[i].rho().size(), 0.0);
+		dataQ[Pstream::myProcNo()].setSize(qVol[i].size(), 0.0);
+
 		// The if structure below gathers data from all processors
 		if(Pstream::master())
 		{
@@ -289,22 +293,23 @@ int main(int argc, char *argv[])
 		    dataT[0] = thermos[i].T();
 		    dataRho[0] = thermos[i].rho();
 		    dataQ[0] = qVol[i].internalField();
-		  
+		    
 		    // Gather data from all processors to master
 		    for(label j=1; j<Pstream::nProcs(); j++)
 		    {
 			IPstream inputMasterStream(Pstream::blocking, j);
-			inputMasterStream >> dataT[j] >> dataRho[j] >> dataQ[j];
+			inputMasterStream >> dataT[j] >> dataRho[j] >> dataQ[j] >> solidList[i][j];
 		    }
 		  
+		    if(solidRegions[i].name() == "fuel")
+		    {
+//			Pout << " --- ADDED: dataQ[0] (master): " << dataQ[0] << endl;
+//			Pout << " --- ADDED: solidLists[processo]: " << solidList[i][Pstream::myProcNo()] << endl;
+		    }
+
 		    // Copy from dataT and dataRho to the completeList for SOLID Regions
 		    for(int k=0; k<Pstream::nProcs(); k++)
 		    {
-			if(solidRegions[i].name() == "fuel")
-			{
-			    Pout << " --- ADDED: dataQ[" << k << "]= " << dataQ[k] << endl;
-			    Pout << " --- ADDED: solidList[" << solidRegions[i].name() << "][" << k << "]= " << solidList[i][k] << endl;
-			}
 			// This loop invariant is the size of dataT, which is the same of dataRho and dataQ.
 			// Use of any of these lists yields the same result
 			for(int m=0; m<dataT[k].size(); m++)
@@ -332,6 +337,15 @@ int main(int argc, char *argv[])
 		    // 0 references de master process
 		    OPstream outputSlavesStream(Pstream::blocking, 0);
 		    outputSlavesStream << localDataT << localDataRho << localDataQ << solidList[i][Pstream::myProcNo()];
+
+		    if(solidRegions[i].name() == "fuel")
+		    {
+//			Pout << " --- ADDED: localDataQ: " << localDataQ << endl;
+//			Pout << " --- ADDED: solidLists[processo]: " << solidList[i][Pstream::myProcNo()] << endl;
+			int rd = rand()%78;
+//			Pout << " --- ADDED: mod: " << solidList[i][Pstream::myProcNo()][rd]%solidList[i][Pstream::myProcNo()].size() << endl;
+//			Pout << " --- ADDED: indice: " << solidList[i][Pstream::myProcNo()][rd]/solidList[i][Pstream::myProcNo()].size() << endl;
+		    }
 		}
 	      
 		// -----------------------------------------------------------------------------------------
