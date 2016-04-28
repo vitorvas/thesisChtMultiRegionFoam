@@ -208,7 +208,9 @@ int main(int argc, char *argv[])
 		if(Pstream::master())
 		{
 		    // Wait for milonga.
+		    Info << nl << "--- Waiting for milonga... ";
 		    sem_wait(semsent);
+		    Info << "Ok!" << endl;
 		    
 		    // For master processor data is copied directly
 		    dataT[0] = thermoFluid[i].T();
@@ -234,7 +236,6 @@ int main(int argc, char *argv[])
 
 			    // First test to send data to Milonga
 			    shmTarray[fluidRegionsLists[i][(k*dataT[k].size())+m]] = dataT[k][m];
-			    shmDarray[fluidRegionsLists[i][(k*dataRho[k].size())+m]] = dataRho[k][m];
 			}
 		    }
 		}
@@ -323,8 +324,6 @@ int main(int argc, char *argv[])
 
 			    // First test to send data to Milonga
 			    shmTarray[solidRegionsLists[i][(k*dataT[k].size())+m]] = dataT[k][m];
-			    shmDarray[solidRegionsLists[i][(k*dataRho[k].size())+m]] = dataRho[k][m];
-
 			}
 		    }
 		}
@@ -340,9 +339,10 @@ int main(int argc, char *argv[])
 
 		    if(solidRegions[i].name() == "fuel")
 		    {
+// -------------------  Debugging			
 //			Pout << " --- ADDED: localDataQ: " << localDataQ << endl;
 //			Pout << " --- ADDED: solidLists[processo]: " << solidList[i][Pstream::myProcNo()] << endl;
-			int rd = rand()%78;
+//			int rd = rand()%78;
 //			Pout << " --- ADDED: mod: " << solidList[i][Pstream::myProcNo()][rd]%solidList[i][Pstream::myProcNo()].size() << endl;
 //			Pout << " --- ADDED: indice: " << solidList[i][Pstream::myProcNo()][rd]/solidList[i][Pstream::myProcNo()].size() << endl;
 		    }
@@ -355,7 +355,7 @@ int main(int argc, char *argv[])
 		// Calling neutronics
 		if(solidRegions[i].name() == "fuel" && Pstream::master())
 		{
-		    Info << nl << "Calling NEUTRONICS..." << nl << endl;
+		    Info << nl << "--- Calling NEUTRONICS..." << nl << endl;
 		    for(int o=0; o<solidRegionsLists[i].size(); o++)
 		    {
 			powerCompleteList[solidRegionsLists[i][o]] = shmQarray[solidRegionsLists[i][o]];
