@@ -1,4 +1,4 @@
 chtMultiRegionSimpleFoam.C
 
-EXE = /home/vitors/bin/thesisCoupledFoam
+EXE = ${HOME}/bin/thesisCoupledFoam
 
