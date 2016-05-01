@@ -20,10 +20,10 @@ listac = lidoc[findexc:lindexc]
 
 # Split and sort the list
 listf = listaf.split()
-listf.sort()
+#listf.sort()
 
 listc = listac.split()
-listc.sort()
+#listc.sort()
 
 # Join list back to string
 listac = '\n'.join(listc)
