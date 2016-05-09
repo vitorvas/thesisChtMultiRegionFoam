@@ -360,6 +360,7 @@ int main(int argc, char *argv[])
 		    {
 			powerCompleteList[solidRegionsLists[i][o]] = shmQarray[solidRegionsLists[i][o]];
 		    }
+		    Info << " --- Q data read from milonga." << nl << endl;
 
 		    // Send semaphore to Milonga
 		    sem_post(semreceived);
