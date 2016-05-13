@@ -48,7 +48,7 @@
   OpenFOAM and Milonga communication is based in POSIX semaphores.
   Milonga should be started before OpenFOAM. Otherwise OpenFOAM will 
   hold soon after initialization waiting for the first semaphore.
-  (A call to sem_wait(semsent) in createCouplingFields.H)
+  (A call to sem_wait(calcOf) in createCouplingFields.H)
 
   \*---------------------------------------------------------------------------*/
 
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     // Number of CFD iterations before neutronics call
     // hardcoded:
     unsigned int nIterations = 0;
-    unsigned int cFact = 2;
+    unsigned int cFact = 5;
    
     regionProperties rp(runTime);
   
@@ -164,15 +164,18 @@ int main(int argc, char *argv[])
 	// - bool values updated to make
       
 	Info << " ------ %: " << nIterations%cFact
-		   << " time().value()= " << runTime.time().value()
-		   << " cFact= " << cFact
-		   << endl;
+	     << " time().value()= " << runTime.time().value()
+	     << " cFact= " << cFact
+	     << " coupling= " << coupling
+	     << endl;
 
-	if(!(nIterations%cFact)) // Controls neutronics call
+	// Recall: coupling is created in createCouplingFields and it is false
+	// if no shm files are correctly read.
+
+	if(!(nIterations%cFact) && coupling) // Controls neutronics call
 	{
 	    forAll(fluidRegions, i)
 	    {
-
 		if(!Pstream::parRun())
 		{
 		    // Force cells references ordering.
@@ -207,11 +210,6 @@ int main(int argc, char *argv[])
 		// The if structure below gathers data from all processors
 		if(Pstream::master())
 		{
-		    // Wait for milonga.
-		    Info << nl << "--- Waiting for milonga... ";
-		    sem_wait(semsent);
-		    Info << "Ok!" << endl;
-		    
 		    // For master processor data is copied directly
 		    dataT[0] = thermoFluid[i].T();
 		    dataRho[0] = thermoFluid[i].rho();
@@ -348,22 +346,28 @@ int main(int argc, char *argv[])
 		    }
 		}
 	      
+
 		// -----------------------------------------------------------------------------------------
+		// Wait for semaphore before reading power from shm memory
 		// -----------------------------------------------------------------------------------------
+		sem_wait(calcMil);
+		Info << nl << "--- Calling NEUTRONICS... ";
+
 		// -----------------------------------------------------------------------------------------
+		// Send semaphore after writing temperatures on shm memory
+		// -----------------------------------------------------------------------------------------
+		sem_post(calcOf);
+		Info << "DONE!" << nl << endl;
 
 		// Calling neutronics
 		if(solidRegions[i].name() == "fuel" && Pstream::master())
 		{
-		    Info << nl << "--- Calling NEUTRONICS..." << nl << endl;
+
 		    for(int o=0; o<solidRegionsLists[i].size(); o++)
 		    {
 			powerCompleteList[solidRegionsLists[i][o]] = shmQarray[solidRegionsLists[i][o]];
 		    }
 		    Info << " --- Q data read from milonga." << nl << endl;
-
-		    // Send semaphore to Milonga
-		    sem_post(semreceived);
 		}
 	      
 	    } // End forAll solid loop
