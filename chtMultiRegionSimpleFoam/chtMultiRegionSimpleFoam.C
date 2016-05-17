@@ -236,6 +236,9 @@ int main(int argc, char *argv[])
 			    shmTarray[fluidRegionsLists[i][(k*dataT[k].size())+m]] = dataT[k][m];
 			}
 		    }
+
+
+	    
 		}
 
 		else
@@ -345,19 +348,24 @@ int main(int argc, char *argv[])
 //			Pout << " --- ADDED: indice: " << solidList[i][Pstream::myProcNo()][rd]/solidList[i][Pstream::myProcNo()].size() << endl;
 		    }
 		}
-	      
+		
 
-		// -----------------------------------------------------------------------------------------
-		// Wait for semaphore before reading power from shm memory
-		// -----------------------------------------------------------------------------------------
-		sem_wait(calcMil);
-		Info << nl << "--- Calling NEUTRONICS... ";
+	    } // End forAll solid loop - data is written to SHM
 
-		// -----------------------------------------------------------------------------------------
-		// Send semaphore after writing temperatures on shm memory
-		// -----------------------------------------------------------------------------------------
-		sem_post(calcOf);
-		Info << "DONE!" << nl << endl;
+
+	    // milonga must be called
+	    Info << nl << "--- Calling NEUTRONICS... ";
+	    sem_post(calcOf);
+	    
+	    sem_wait(calcMil);
+	    Info << "DONE!" << nl << endl;
+
+	    // -----------------------------------------------------------------------------------------
+	    // After neutronics call, Q data must be scattered to all processors and regions
+
+	    forAll(solidRegions, i) // Loop to scatter Q data from neutronics to all regions and processors
+		                    // Note that only the 'fuel' region is used.
+	    {
 
 		// Calling neutronics
 		if(solidRegions[i].name() == "fuel" && Pstream::master())
@@ -370,15 +378,6 @@ int main(int argc, char *argv[])
 		    Info << " --- Q data read from milonga." << nl << endl;
 		}
 	      
-	    } // End forAll solid loop
-
-	  
-	    // -----------------------------------------------------------------------------------------
-	    // After neutronics call, Q data must be scattered to all processors and regions
-
-	    forAll(solidRegions, i) // Loop to scatter Q data from neutronics to all regions and processors
-		                    // Note that only the 'fuel' region is used.
-	    {
 		// Initialize dataQ field with the right size
 		List<scalarList> dataQ(Pstream::nProcs());
 

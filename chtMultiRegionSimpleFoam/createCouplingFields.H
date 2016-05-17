@@ -36,7 +36,7 @@ calcMil = sem_open("calcMil", O_CREAT, 0666);
 if(Pstream::master())
 {
 // Semaphores and shared memory files are tested at this point.
-// If milonga is not running, OpenFOAM exits.
+// If milonga is not running, OpenFOAM runs uncoupled.
     shmTfile = shm_open("temperaturas", O_RDWR, 0666);
     shmQfile = shm_open("potencias", O_RDWR, 0666);
     
