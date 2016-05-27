@@ -101,9 +101,9 @@ int main(int argc, char *argv[])
     // hardcoded:
     unsigned int nIterations = 0;
     unsigned int cFact = 100;
-   
+
     regionProperties rp(runTime);
-  
+    
 #include "createFluidMeshes.H"
 #include "createSolidMeshes.H"
 
@@ -437,7 +437,6 @@ int main(int argc, char *argv[])
     } // runTime.loop()
 
     // End of runTime.loop(), free milonga
-    //*shmFint = 1;
     
     return 0;
 }
