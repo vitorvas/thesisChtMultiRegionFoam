@@ -19,7 +19,7 @@
 
     PtrList<fv::IOoptionList> fluidFvOptions(fluidRegions.size());
 
-List<labelList> fluidList(Pstream::nProcs());
+    List<labelList> fluidList(Pstream::nProcs());
 
     // Populate fluid field pointer lists
     forAll(fluidRegions, i)
