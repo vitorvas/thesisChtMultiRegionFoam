@@ -9,42 +9,41 @@ unsigned int totalNumberOfCells = 0;
 // ---------------------------------------------------------------
 // Notes on shared memory coupling:
 //
-// - Shared memory files are created by Milonga.
-// - Files are also deleted by Milonga.
+// - Shared memory files are created by OpenFoam.
+// - Files must be deleted by OpenFOAM.
+// (changed from the last implementation)
+
+bool coupling = true;
 
 // Three C standard arrays are created to shared data with Milonga
 double *shmTarray;
 double *shmQarray;
-//int *shmFint;
 
 void *shmT;
 void *shmQ;
-//void *shmF;
 
 int shmTfile;
 int shmQfile;
-//int shmFfile;
 
 // Posix C semaphores
-sem_t *semsent;
-sem_t *semreceived;
+sem_t *calcOf;
+sem_t *calcMil;
 
 // Posix structures initialization
-semsent = sem_open("semsent", O_CREAT, 0666);
-semreceived = sem_open("semreceived", O_CREAT, 0666);
+calcOf = sem_open("calcOf", O_CREAT, 0666);
+calcMil = sem_open("calcMil", O_CREAT, 0666);
 
 if(Pstream::master())
 {
 // Semaphores and shared memory files are tested at this point.
-// If milonga is not running, OpenFOAM exits.
+// If milonga is not running, OpenFOAM runs uncoupled.
     shmTfile = shm_open("temperaturas", O_RDWR, 0666);
     shmQfile = shm_open("potencias", O_RDWR, 0666);
-//    shmFfile = shm_open("freemilonga", O_RDWR, 0666);
-
-    if(shmTfile == -1 || shmQfile == -1 )//|| shmFfile == -1)
+    
+    if(shmTfile == -1 || shmQfile == -1)
     {
-	Info << " --- Error getting shared memory: " << strerror(errno) << ". Exiting..." << endl;
-	exit(errno);
+	Info << " --- Error getting shared memory: " << strerror(errno) << ". NON-COUPLED calculations." << endl;
+	coupling = false;
     }
 }
 
@@ -72,10 +71,9 @@ if(Pstream::master())
 // After reading the shared memory files, they must be mapped to data
     shmT = mmap(NULL, totalNumberOfCells*sizeof(double), PROT_WRITE, MAP_SHARED, shmTfile, 0);
     shmQ = mmap(NULL, totalNumberOfCells*sizeof(double), PROT_WRITE, MAP_SHARED, shmQfile, 0);
-//    shmF = mmap(NULL, sizeof(int), PROT_WRITE, MAP_SHARED, shmFfile, 0);
 
 // Check if all files were properly mapped
-    if(shmT == MAP_FAILED || shmQ == MAP_FAILED)// || shmF == MAP_FAILED)
+    if((shmT == MAP_FAILED || shmQ == MAP_FAILED) && (coupling))
     {
 	Info << " --- Error mapping shared memory: " << strerror(errno) << ". Exiting..." << endl;
 	exit(errno);
@@ -84,9 +82,4 @@ if(Pstream::master())
 // Make a C++ cast
     shmTarray = reinterpret_cast<double*>(shmT);
     shmQarray = reinterpret_cast<double*>(shmQ);
-//    shmFint = reinterpret_cast<int*>(shmF);
 }
-
-// for(unsigned int i=0; i<totalNumberOfCells; i++)
-//     powerCompleteList[i] = 0.9 + static_cast <float> (rand())
-// 			      /( static_cast <float> (RAND_MAX/(1.1-0.9)));

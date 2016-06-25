@@ -48,7 +48,7 @@
   OpenFOAM and Milonga communication is based in POSIX semaphores.
   Milonga should be started before OpenFOAM. Otherwise OpenFOAM will 
   hold soon after initialization waiting for the first semaphore.
-  (A call to sem_wait(semsent) in createCouplingFields.H)
+  (A call to sem_wait(calcOf) in createCouplingFields.H)
 
   \*---------------------------------------------------------------------------*/
 
@@ -100,10 +100,10 @@ int main(int argc, char *argv[])
     // Number of CFD iterations before neutronics call
     // hardcoded:
     unsigned int nIterations = 0;
-    unsigned int cFact = 2;
-   
+    unsigned int cFact = 100;
+
     regionProperties rp(runTime);
-  
+    
 #include "createFluidMeshes.H"
 #include "createSolidMeshes.H"
 
@@ -164,15 +164,18 @@ int main(int argc, char *argv[])
 	// - bool values updated to make
       
 	Info << " ------ %: " << nIterations%cFact
-		   << " time().value()= " << runTime.time().value()
-		   << " cFact= " << cFact
-		   << endl;
+	     << " time().value()= " << runTime.time().value()
+	     << " cFact= " << cFact
+	     << " coupling= " << coupling
+	     << endl;
 
-	if(!(nIterations%cFact)) // Controls neutronics call
+	// Recall: coupling is created in createCouplingFields and it is false
+	// if no shm files are correctly read.
+
+	if(!(nIterations%cFact) && coupling) // Controls neutronics call
 	{
 	    forAll(fluidRegions, i)
 	    {
-
 		if(!Pstream::parRun())
 		{
 		    // Force cells references ordering.
@@ -207,11 +210,6 @@ int main(int argc, char *argv[])
 		// The if structure below gathers data from all processors
 		if(Pstream::master())
 		{
-		    // Wait for milonga.
-		    Info << nl << "--- Waiting for milonga... ";
-		    sem_wait(semsent);
-		    Info << "Ok!" << endl;
-		    
 		    // For master processor data is copied directly
 		    dataT[0] = thermoFluid[i].T();
 		    dataRho[0] = thermoFluid[i].rho();
@@ -238,6 +236,9 @@ int main(int argc, char *argv[])
 			    shmTarray[fluidRegionsLists[i][(k*dataT[k].size())+m]] = dataT[k][m];
 			}
 		    }
+
+
+	    
 		}
 
 		else
@@ -347,33 +348,36 @@ int main(int argc, char *argv[])
 //			Pout << " --- ADDED: indice: " << solidList[i][Pstream::myProcNo()][rd]/solidList[i][Pstream::myProcNo()].size() << endl;
 		    }
 		}
-	      
-		// -----------------------------------------------------------------------------------------
-		// -----------------------------------------------------------------------------------------
-		// -----------------------------------------------------------------------------------------
+		
 
-		// Calling neutronics
-		if(solidRegions[i].name() == "fuel" && Pstream::master())
-		{
-		    Info << nl << "--- Calling NEUTRONICS..." << nl << endl;
-		    for(int o=0; o<solidRegionsLists[i].size(); o++)
-		    {
-			powerCompleteList[solidRegionsLists[i][o]] = shmQarray[solidRegionsLists[i][o]];
-		    }
+	    } // End forAll solid loop - data is written to SHM
 
-		    // Send semaphore to Milonga
-		    sem_post(semreceived);
-		}
-	      
-	    } // End forAll solid loop
 
-	  
+	    // milonga must be called
+	    Info << nl << "--- Calling NEUTRONICS... ";
+	    sem_post(calcOf);
+	    
+	    sem_wait(calcMil);
+	    Info << "DONE!" << nl << endl;
+
 	    // -----------------------------------------------------------------------------------------
 	    // After neutronics call, Q data must be scattered to all processors and regions
 
 	    forAll(solidRegions, i) // Loop to scatter Q data from neutronics to all regions and processors
 		                    // Note that only the 'fuel' region is used.
 	    {
+
+		// Calling neutronics
+		if(solidRegions[i].name() == "fuel" && Pstream::master())
+		{
+
+		    for(int o=0; o<solidRegionsLists[i].size(); o++)
+		    {
+			powerCompleteList[solidRegionsLists[i][o]] = shmQarray[solidRegionsLists[i][o]];
+		    }
+		    Info << " --- Q data read from milonga." << nl << endl;
+		}
+	      
 		// Initialize dataQ field with the right size
 		List<scalarList> dataQ(Pstream::nProcs());
 
@@ -433,7 +437,6 @@ int main(int argc, char *argv[])
     } // runTime.loop()
 
     // End of runTime.loop(), free milonga
-    //*shmFint = 1;
     
     return 0;
 }

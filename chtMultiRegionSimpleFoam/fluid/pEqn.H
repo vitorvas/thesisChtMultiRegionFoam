@@ -1,18 +1,29 @@
 {
+    // Lembrete: rho é um volScalarField criado em createFields
     rho = thermo.rho();
     rho = max(rho, rhoMin[i]);
     rho = min(rho, rhoMax[i]);
     rho.relax();
 
+    
     volScalarField rAU(1.0/UEqn().A());
+
+    // Interpolate rAu to faces giving it "Dp" name
     surfaceScalarField rhorAUf("Dp", fvc::interpolate(rho*rAU));
 
+    // H by A
+    // Remembering that U is a volVectorField defined in setRegionFluidFields.H
     volVectorField HbyA("HbyA", U);
     HbyA = rAU*UEqn().H();
+
+    // Libera o tmp velocidade criado em UEqn.H
     UEqn.clear();
 
     surfaceScalarField phig(-rhorAUf*ghf*fvc::snGrad(rho)*mesh.magSf());
 
+    // phiHbyA é um a densidade interpolada nas faces vezes
+    // o produto interno do vetor HbyA interpolado e
+    // os vetores de area das faces na malha
     surfaceScalarField phiHbyA
     (
         "phiHbyA",
@@ -20,7 +31,7 @@
     );
 
     // OpenFOAM 2.2.2
-//    fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
+    // fvOptions.relativeFlux(fvc::interpolate(rho), phiHbyA);
 
     // OpenFOAM 2.4.0
     fvOptions.makeRelative(fvc::interpolate(rho), phiHbyA);
