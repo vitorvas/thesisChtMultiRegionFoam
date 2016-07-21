@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     // Number of CFD iterations before neutronics call
     // hardcoded:
     unsigned int nIterations = 0;
-    unsigned int cFact = 20;
+    unsigned int cFact = 2000;
 
     regionProperties rp(runTime);
     

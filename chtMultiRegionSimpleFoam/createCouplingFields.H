@@ -16,14 +16,14 @@ unsigned int totalNumberOfCells = 0;
 bool coupling = true;
 
 // Three C standard arrays are created to shared data with Milonga
-double *shmTarray;
-double *shmQarray;
+double *shmTarray = NULL;
+double *shmQarray = NULL;
 
 void *shmT;
 void *shmQ;
 
-int shmTfile;
-int shmQfile;
+int shmTfile = 0;
+int shmQfile = 0;
 
 // Posix C semaphores
 sem_t *calcOf;
