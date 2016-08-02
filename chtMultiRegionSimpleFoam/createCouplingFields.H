@@ -42,9 +42,11 @@ if(Pstream::master())
     
     if(shmTfile == -1 || shmQfile == -1)
     {
-	Info << " --- Error getting shared memory: " << strerror(errno) << ". NON-COUPLED calculations." << endl;
+      Info << nl << " ---: Error getting shared memory: " << strerror(errno) << ". NON-COUPLED calculations." << nl << endl;
 	coupling = false;
     }
+    else
+      Info << nl << " ---: milonga shared memory data detected! COUPLED calculations. " << nl << endl;
 }
 
 if(Pstream::master())
