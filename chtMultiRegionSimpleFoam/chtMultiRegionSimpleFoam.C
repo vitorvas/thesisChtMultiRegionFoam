@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     // Number of CFD iterations before neutronics call
     // hardcoded:
     unsigned int nIterations = 0;
-    unsigned int cFact = 100;
+    unsigned int cFact = 1; //100;
 
     regionProperties rp(runTime);
     
@@ -216,11 +216,24 @@ int main(int argc, char *argv[])
 		    {
 			IPstream inputMasterStream(Pstream::blocking, j);
 			inputMasterStream >> dataT[j] >> dataRho[j];
+			
 		    }
-
 		    // Copy from dataT and dataRho to the completeList for FLUID Regions
 		    for(int k=0; k<Pstream::nProcs(); k++)
 		    {
+			double valor = -1.0;
+			unsigned int offset = 0;
+
+			if(fluidRegions[i].name() == "coolant")
+			{
+			    // The order is: fuel, cladding, coolant
+			    // THIS IS HARD CODED. DOES NOT WORK FOR OTHER MESH
+			    // Correct ASAP
+			    // thermos[1] is the fuel region
+			    offset = thermos[0].T().size()+thermos[1].T().size();
+			    valor = 333;
+			}
+
 			for(int m=0; m<dataT[k].size(); m++)
 			{
 			    // ATTENTION:
@@ -230,7 +243,7 @@ int main(int argc, char *argv[])
 			    densityCompleteList[fluidRegionsLists[i][(k*dataRho[k].size())+m]] = dataRho[k][m];
 
 			    // First test to send data to Milonga
-			    shmTarray[fluidRegionsLists[i][(k*dataT[k].size())+m]] = dataT[k][m];
+			    shmTarray[offset+m] = dataT[k][m];
 			}
 		    }
 
@@ -281,7 +294,7 @@ int main(int argc, char *argv[])
 		// Since T, rho and Q have the same size
 		// the processing of all data is performed
 		// inside the same loop
-		dataT[Pstream::myProcNo()].setSize(thermos[i].T().size(), 0.0);
+		dataT[Pstream::myProcNo()].setSize(thermos[i].T().size());
 		dataRho[Pstream::myProcNo()].setSize(thermos[i].rho().size(), 0.0);
 		dataQ[Pstream::myProcNo()].setSize(qVol[i].size(), 0.0);
 
@@ -300,17 +313,30 @@ int main(int argc, char *argv[])
 			inputMasterStream >> dataT[j] >> dataRho[j] >> dataQ[j] >> solidList[i][j];
 		    }
 		  
-		    if(solidRegions[i].name() == "fuel")
-		    {
-//			Pout << " --- ADDED: dataQ[0] (master): " << dataQ[0] << endl;
-//			Pout << " --- ADDED: solidLists[processo]: " << solidList[i][Pstream::myProcNo()] << endl;
-		    }
-
 		    // Copy from dataT and dataRho to the completeList for SOLID Regions
 		    for(int k=0; k<Pstream::nProcs(); k++)
 		    {
+
 			// This loop invariant is the size of dataT, which is the same of dataRho and dataQ.
 			// Use of any of these lists yields the same result
+			
+			double valor = -1.0;
+			unsigned int offset = 0;
+			
+			if(solidRegions[i].name() == "fuel")
+			{
+			    offset = 0;
+			    valor = 999.9;
+			}
+			if(solidRegions[i].name() == "cladding")
+			{
+			    // The order is: fuel, cladding, coolant
+			    // THIS IS HARD CODED. DOES NOT WORK FOR OTHER MESH
+			    // Correct ASAP
+			    offset = thermos[1].T().size();
+			    valor = 555.5;
+			}
+			
 			for(int m=0; m<dataT[k].size(); m++)
 			{
 			    // ATTENTION:
@@ -320,8 +346,7 @@ int main(int argc, char *argv[])
 			    densityCompleteList[solidRegionsLists[i][(k*dataRho[k].size())+m]] = dataRho[k][m];
 			    powerCompleteList[solidRegionsLists[i][(k*dataQ[k].size())+m]] = dataQ[k][m];
 
-			    // First test to send data to Milonga
-			    shmTarray[solidRegionsLists[i][(k*dataT[k].size())+m]] = dataT[k][m];
+			    shmTarray[offset+m] = dataT[k][m];
 			}
 		    }
 		}
@@ -334,22 +359,10 @@ int main(int argc, char *argv[])
 		    // 0 references de master process
 		    OPstream outputSlavesStream(Pstream::blocking, 0);
 		    outputSlavesStream << localDataT << localDataRho << localDataQ << solidList[i][Pstream::myProcNo()];
-
-		    if(solidRegions[i].name() == "fuel")
-		    {
-// -------------------  Debugging			
-//			Pout << " --- ADDED: localDataQ: " << localDataQ << endl;
-//			Pout << " --- ADDED: solidLists[processo]: " << solidList[i][Pstream::myProcNo()] << endl;
-//			int rd = rand()%78;
-//			Pout << " --- ADDED: mod: " << solidList[i][Pstream::myProcNo()][rd]%solidList[i][Pstream::myProcNo()].size() << endl;
-//			Pout << " --- ADDED: indice: " << solidList[i][Pstream::myProcNo()][rd]/solidList[i][Pstream::myProcNo()].size() << endl;
-		    }
 		}
 		
-
 	    } // End forAll solid loop - data is written to SHM
-
-
+	    
 	    // milonga must be called
 	    Info << nl << "--- Calling NEUTRONICS... ";
 	    sem_post(calcOf);
