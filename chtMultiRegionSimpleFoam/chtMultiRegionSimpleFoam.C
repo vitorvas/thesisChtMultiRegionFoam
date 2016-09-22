@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     // Number of CFD iterations before neutronics call
     // hardcoded:
     unsigned int nIterations = 0;
-    unsigned int cFact = 1; //100;
+    unsigned int cFact = 100;
 
     regionProperties rp(runTime);
     
@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
 	//   for region 'fuel')
 	// - bool values updated to make
       
-	Info << " ------ %: " << nIterations%cFact
+	Info << " ------ Neutronics call ratio (iterations): " << nIterations%cFact
 	     << endl;
 
 	// Recall: coupling is created in createCouplingFields and it is false
