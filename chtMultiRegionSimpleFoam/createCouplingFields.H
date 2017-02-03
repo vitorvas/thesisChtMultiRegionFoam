@@ -31,29 +31,32 @@ int shmQfile = 0;
 sem_t *calcOf;
 sem_t *calcMil;
 
+// Names for files are derived from the current directory plus t and p
+// for temperatures and power. This allows running multiple coupled calculations
+// in the same system (as long as the cases directory names are different.
+char buffer[1000] = "";
+getcwd(buffer, 1000);
+
+std::string my(buffer);
+
+// Strip string
+std::string filename = my.substr(my.find_last_of("/\\")+1);
+
+// create file strings
+std::string temperatures = filename+"T";
+std::string potencias = filename+"Q";
+std::string semOf = filename+"Of";
+std::string semMil = filename+"Mil";
+
 // Posix structures initialization
-calcOf = sem_open("calcOf", O_CREAT, 0666);
-calcMil = sem_open("calcMil", O_CREAT, 0666);
+calcOf = sem_open(semOf.c_str(), O_CREAT, 0666);
+calcMil = sem_open(semMil.c_str(), O_CREAT, 0666);
 
 if(Pstream::master())
 {
 // Semaphores and shared memory files are tested at this point.
 // If milonga is not running, OpenFOAM runs uncoupled.
 
-    // Names for files are derived from the current directory plus t and p
-    // for temperatures and power. This allows running multiple coupled calculations
-    // in the same system (as long as the cases directory names are different.
-    char buffer[1000] = "";
-    getcwd(buffer, 1000);
-
-    std::string my(buffer);
-    
-    // Strip string
-    std::string filename = my.substr(my.find_last_of("/\\")+1);
-
-    // create file strings
-    std::string temperatures = filename+"T";
-    std::string potencias = filename+"Q";
 	
     shmTfile = shm_open(temperatures.c_str(), O_RDWR, 0666);
     shmQfile = shm_open(potencias.c_str(), O_RDWR, 0666);
