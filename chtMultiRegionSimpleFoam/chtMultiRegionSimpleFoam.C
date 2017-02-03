@@ -67,10 +67,11 @@
 // C++ stdlib
 #include <fstream>
 #include <vector>
-#include <iostream>
+#include <iostream>        // Used also to get currenty directory
 #include <cstdio>
 #include <ctime>
 #include <cstring>         // Used by memcpy when coupling
+#include <string>
 
 // C Posix (Shared memory communication)
 #include <semaphore.h>
@@ -79,6 +80,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <unistd.h>
 
 using namespace std;
 

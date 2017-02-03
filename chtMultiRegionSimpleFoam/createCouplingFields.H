@@ -1,3 +1,5 @@
+// Include std C to get directory name
+
 // Create Lists for data interchange with neutronics
 
 // Total number of cells is the number of elements in the
@@ -37,8 +39,24 @@ if(Pstream::master())
 {
 // Semaphores and shared memory files are tested at this point.
 // If milonga is not running, OpenFOAM runs uncoupled.
-    shmTfile = shm_open("temperaturas", O_RDWR, 0666);
-    shmQfile = shm_open("potencias", O_RDWR, 0666);
+
+    // Names for files are derived from the current directory plus t and p
+    // for temperatures and power. This allows running multiple coupled calculations
+    // in the same system (as long as the cases directory names are different.
+    char buffer[1000] = "";
+    getcwd(buffer, 1000);
+
+    std::string my(buffer);
+    
+    // Strip string
+    std::string filename = my.substr(my.find_last_of("/\\")+1);
+
+    // create file strings
+    std::string temperatures = filename+"T";
+    std::string potencias = filename+"Q";
+	
+    shmTfile = shm_open(temperatures.c_str(), O_RDWR, 0666);
+    shmQfile = shm_open(potencias.c_str(), O_RDWR, 0666);
     
     if(shmTfile == -1 || shmQfile == -1)
     {
