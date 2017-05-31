@@ -1,18 +1,77 @@
+/*---------------------------------------------------------------------------* \
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+  \\    /   O peration     |
+  \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+  \\/     M anipulation  |
+  -------------------------------------------------------------------------------
+  License
+  This file is part of OpenFOAM.
 
-//    fvMesh& mesh = solidRegions[i];
+  OpenFOAM is free software: you can redistribute it and/or modify it
+  under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+  for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+  Application
+  chtMultiRegionSimpleFoam
+
+  Description
+  Steady-state version of chtMultiRegionFoam
+
+  ---------------------------------------------------------------------------
+  ---
+  --- This file is a modified version of the original OpenFOAM code by
+  --- Vitor Vasconcelos Araújo Silva Ph.D thesis work as student of 
+  --- Universidade Federal de Minas Gerais - UFMG, Brazil and worker
+  --- of Centro de Desenvolvimento da Tecnologia Nuclear, CDTN/CNEN, Brazil
+  ---
+  --- Copyright 2016 Vitor Silva
+  ---
+  --- contact: vitors@cdtn.br
+  ---
+  --- UFMG, CDTN/CNEN and hereby disclaims all copyright in the present
+  --- program written by Vitor Vasconcelos Araújo Silva.
+  ---
+  --- Vitor Vasconcelos Araújo Silva, 19 december 2016
+
+  Application
+  thesisCoupledFoam
+
+  Description
+  Steady-state version of chtMultiRegionFoam adapted to get the source-term for 
+  the energy equation from an external source. The source term is defined as a 
+  volScalarField and read from a C array structure. This version is implemented 
+  and tested to run in parallel and sequentialy.
+
+  IMPORTANT:
+  ----------
+  OpenFOAM and Milonga communication is based in POSIX semaphores.
+  Milonga should be started before OpenFOAM. Otherwise OpenFOAM will 
+  hold soon after initialization waiting for the first semaphore.
+  (A call to sem_wait(calcOf) in createCouplingFields.H)
+
+  ---------------------------------------------------------------------------
+
+  \*---------------------------------------------------------------------------*/
+
     solidThermo& thermo = thermos[i];
-//    const radiation::radiationModel& radiation = radiations[i];
 
     tmp<volScalarField> trho = thermo.rho();
-//    const volScalarField& rho = trho();
-
     tmp<volScalarField> tcp = thermo.Cp();
-//    const volScalarField& cp = tcp();
-
     tmp<volScalarField> talpha = thermo.alpha();
+
     const volScalarField& alpha = talpha();
+
     tmp<volScalarField> tkappa = thermo.kappa();
-//    const volScalarField& kappa = tkappa();
 
     volScalarField& h = thermo.he();
 
@@ -39,129 +98,27 @@ if (solidRegions[i].name() == "fuel")
     // solids directories
     scalarField sF = scalarField(qVol[i].internalField());
     scalarField completeSF(qVol[i].internalField().size()*Pstream::nProcs(), 0.0);
-
-    // Info << " --- ADDED: " << nl;
-    // Info << " sF.size()= " << sF.size() << nl << " completeSF.size()= " << completeSF.size() << nl;
-    // Info << " sF= " << sF << nl;
-    // Info << " completeSF= " << completeSF << nl;
     
     // Values in qVol[i] are dimensioned values.
     // Pay attention on this before assigning it to the vector.
     // the code below only assing 0 to the vector
     // v.assign(qVol[i].size(), 0);
       
-    //    procScalarFieldList[Pstream::myProcNo()] = sF;
-    //    Info << " --- ADDED: procScalarFieldList.size()= " << procScalarFieldList.size() << nl;
-    //Info << procScalarFieldList << endl;
-    
     // This is only necessary if running in parallel
     if(Pstream::parRun())
       {
 	fileName cellCorr(runTime.rootPath()+"/"+runTime.caseName()+
 			  "/constant/fuel/polyMesh");
-
-	// // Read cellProcAddressing for each processor
-	// labelIOList procList
-	//   (
-	//    IOobject
-	//    (
-	//     "cellProcAddressing", 			   		// Name
-	//     cellCorr,
-	//     mesh,  			// Registry
-	//     IOobject::MUST_READ, 	// Read option
-	//     IOobject::NO_WRITE 		// Write Option
-	//     ),
-	//    procList
-	//    );
-
-	// procLabelList[Pstream::myProcNo()] = procList;
-
-	//	Pout << " --- ADDED: procLabelList[" << Pstream::myProcNo()
-	//     << "]: " << procList;
-	
-	//	Pstream::gatherList<scalarField>(procScalarFieldList);
-	//	Pstream::scatterList<scalarField>(procScalarFieldList);
-
-	//			Pout << " --- ADDED: procList: " << procList << endl;
-
       }
-
-    // ------------------------------------------------------------------------
-    //
-    // As operacoes feitas aqui deverao ser feitas no armazenamento dos dados de
-    // Q, sem arquivos. Por isso não foram totalmente apagadas (14/05/2015)
-    //
-    // ------------------------------------------------------------------------
 
     // First step: get data from processors and write it to a vector in the main processor
-//    label n = Pstream::nProcs();
-
-    // *************************** Corrigir
-    scalar number = 29999+Pstream::myProcNo();
-    scalarList localDataQ(qVol[i].internalField().size(), number);
-
-    // If is the master process it will gather data from
-    // other processes. If in sequential mode, it will not
-    // enter the and jump over the gather iterations
-    // if (Pstream::myProcNo() == 0)
-    //   {
-    // 	// Data structures
-    // 	List<scalarList> allDataQ(n);
-    // 	allDataQ[0] = localDataQ;
-
-    // 	for(label j=1; j<n; j++)
-    // 	  {
-    // 	    // create the input stream from processor i
-    // 	    //	    IPstream lStream(Pstream::blocking, j);
-    // 	    //	    lStream >> allDataQ[j] >> procLabelList[j];
-
-    // 	  }
-    // 	//	Info << " --- ADDED: allData Q: " << allDataQ << endl;
-    //   }
-    // else
-    //   {
-    // 	// create the stream to send to the main proc
-    // 	OPstream lStream
-    // 	  (
-    // 	   Pstream::blocking, 0
-    // 	   );
-    // 	//	lStream << localDataQ << procLabelList[Pstream::myProcNo()];
-    //   }
-
-    // In the solid 'fuel', Q must be read as input and the data from one
-    // file is splitted among the processors.
-    if(!Pstream::parRun())
-      {
-	// Since there is only one processor, the data is sequentially available
-	// from procScalarFieldList[0]
-
-	// ********************************** Erro aqui
-    // 	forAll(completeSF, j)
-    // 	  {
-    // 	    //	    completeSF[j]=dataQ.at(j);
-    // 	  }
-    // 	//	Info << "* SEQ * --- ADDED: qVol[i].internalField() = completeSF: "
-    // 	//	     << completeSF << nl;
-    // 	qVol[i].internalField() = completeSF;
-    //   }
-    // else
-    //   {
-    // 	// If running in parallel, the Q data must be split among the
-    // 	// processors respecting mesh topology. To enforce this restriction,
-    // 	// cell positions are checked from procLabelList vector
-    // 	forAll(sF, j)
-    // 	  {
-    // 	    //	    sF[j]=dataQ.at(procLabelList[Pstream::myProcNo()][j]);
-    // 	  }
-    // 	//	Info << "* PAR * --- ADDED: qVol[i].internalField() = sF: "
-    // 	//	     << sF << nl;
-    // 	qVol[i].internalField()= sF;
-    //   }
-      }
+    // label n = Pstream::nProcs();
+    scalarList localDataQ(qVol[i].internalField().size(), 0.0);
+    
   }
 // If the file is not present, use current qVol[i] (the volScalarField)
 const volScalarField& Q = qVol[i];
 
-//Info << " --- ADDED: Q after setRegionSolidFidls.H = " << Q << nl;
+
 
  

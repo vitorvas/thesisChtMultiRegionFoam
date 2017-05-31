@@ -20,7 +20,6 @@
     fvOptions.constrain(EEqn);
 
     solverPerformance sp = EEqn.solve();
-//    Info << " --- ADDED: sp.finalResidual = " << sp.finalResidual() << endl;
     
     fvOptions.correct(he);
 

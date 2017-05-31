@@ -29,7 +29,7 @@
 
   ---------------------------------------------------------------------------
   ---
-  --- This file is modified version of the original OpenFOAM code by
+  --- This file is a modified version of the original OpenFOAM code by
   --- Vitor Vasconcelos Araújo Silva Ph.D thesis work as student of 
   --- Universidade Federal de Minas Gerais - UFMG, Brazil and worker
   --- of Centro de Desenvolvimento da Tecnologia Nuclear, CDTN/CNEN, Brazil
@@ -234,17 +234,15 @@ int main(int argc, char *argv[])
 		    // Copy from dataT and dataRho to the completeList for FLUID Regions
 		    for(int k=0; k<Pstream::nProcs(); k++)
 		    {
-			double valor = -1.0;
 			unsigned int offset = 0;
 
 			if(fluidRegions[i].name() == "coolant")
 			{
-			    // The order is: fuel, cladding, coolant
-			    // THIS IS HARD CODED. DOES NOT WORK FOR OTHER MESH
-			    // Correct ASAP
-			    // thermos[1] is the fuel region
-			    offset = thermos[0].T().size()+thermos[1].T().size();
-			    valor = 333;
+			  // IMPORTANT REMARK:
+			  // The mesh offset must be checked for other meshes since
+			  // it is based on a fixed structure. This code could fail
+			  // in generic meshes.
+			  offset = thermos[0].T().size()+thermos[1].T().size();
 			}
 
 			for(int m=0; m<dataT[k].size(); m++)
@@ -255,12 +253,10 @@ int main(int argc, char *argv[])
 			    temperatureCompleteList[fluidRegionsLists[i][(k*dataT[k].size())+m]] = dataT[k][m];
 			    densityCompleteList[fluidRegionsLists[i][(k*dataRho[k].size())+m]] = dataRho[k][m];
 
-			    // First test to send data to Milonga
+			    // Send data to Milonga
 			    shmTarray[offset+m] = dataT[k][m];
 			}
 		    }
-
-
 	    
 		}
 
@@ -332,22 +328,20 @@ int main(int argc, char *argv[])
 
 			// This loop invariant is the size of dataT, which is the same of dataRho and dataQ.
 			// Use of any of these lists yields the same result
-			
-			double valor = -1.0;
 			unsigned int offset = 0;
 			
 			if(solidRegions[i].name() == "fuel")
 			{
+			  // IMPORTANT REMARK:
+			  // The mesh offset must be checked for other meshes since
+			  // it is based on a fixed structure. This code could fail
+			  // in generic meshes.
+
 			    offset = 0;
-			    valor = 999.9;
 			}
 			if(solidRegions[i].name() == "cladding")
 			{
-			    // The order is: fuel, cladding, coolant
-			    // THIS IS HARD CODED. DOES NOT WORK FOR OTHER MESH
-			    // Correct ASAP
 			    offset = thermos[1].T().size();
-			    valor = 555.5;
 			}
 			
 			for(int m=0; m<dataT[k].size(); m++)
@@ -369,7 +363,7 @@ int main(int argc, char *argv[])
 		    localDataRho = thermos[i].rho().internalField();
 		    localDataQ = qVol[i].internalField();
 		  
-		    // 0 references de master process
+		    // 0 references the master process
 		    OPstream outputSlavesStream(Pstream::blocking, 0);
 		    outputSlavesStream << localDataT << localDataRho << localDataQ << solidList[i][Pstream::myProcNo()];
 		}
