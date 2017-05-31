@@ -29,10 +29,19 @@
 
   ---------------------------------------------------------------------------
   ---
-  --- This file was modified as part of 
-  --- Vitor Vasconcelos Araújo Silva Ph.D thesis work.
+  --- This file is modified version of the original OpenFOAM code by
+  --- Vitor Vasconcelos Araújo Silva Ph.D thesis work as student of 
+  --- Universidade Federal de Minas Gerais - UFMG, Brazil and worker
+  --- of Centro de Desenvolvimento da Tecnologia Nuclear, CDTN/CNEN, Brazil
   ---
-  contact: vitors@cdtn.br
+  --- Copyright 2016 Vitor Silva
+  ---
+  --- contact: vitors@cdtn.br
+  ---
+  --- UFMG, CDTN/CNEN and hereby disclaims all copyright in the present
+  --- program written by Vitor Vasconcelos Araújo Silva.
+  ---
+  --- Vitor Vasconcelos Araújo Silva, 19 december 2016
 
   Application
   thesisCoupledFoam
@@ -49,6 +58,8 @@
   Milonga should be started before OpenFOAM. Otherwise OpenFOAM will 
   hold soon after initialization waiting for the first semaphore.
   (A call to sem_wait(calcOf) in createCouplingFields.H)
+
+  ---------------------------------------------------------------------------
 
   \*---------------------------------------------------------------------------*/
 
